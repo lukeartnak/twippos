@@ -5,8 +5,6 @@ var Typo = require('typo-js');
 var sqlite3 = require('sqlite3');
 var io = require('socket.io')();
 
-
-
 var db = new sqlite3.Database('tweets.db');
 
 var app = require('express')();
@@ -15,8 +13,9 @@ var io = require('socket.io')(server);
 
 server.listen(8080);
 
-//app.get('/', function (req, res) {
-//});
+app.get('/', function (req, res) {
+  res.sendfile('../index.html');
+});
 
 process.argv.forEach(function (val) {
   if (val == 'createdb') {
