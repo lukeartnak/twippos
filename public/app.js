@@ -21531,6 +21531,7 @@
 	      this.socket = (0, _socket2.default)('127.0.0.1:8080');
 	      this.socket.on('tweet', function (tweet) {
 	        _this2.setState({ tweets: [].concat(_toConsumableArray(_this2.state.tweets), [tweet]) });
+	        console.log(tweet);
 	      });
 	    }
 	  }, {

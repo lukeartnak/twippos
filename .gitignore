@@ -1,3 +1,4 @@
 node_modules/
 .DS_Store
 tweets.db
+npm-debug.log

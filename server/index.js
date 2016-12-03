@@ -7,15 +7,14 @@ var io = require('socket.io')();
 
 var db = new sqlite3.Database('tweets.db');
 
-var app = require('express')();
+var express = require('express')
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 server.listen(8080);
 
-app.get('/', function (req, res) {
-  res.sendfile('../index.html');
-});
+app.use(express.static('public'));
 
 process.argv.forEach(function (val) {
   if (val == 'createdb') {
@@ -46,7 +45,7 @@ process.argv.forEach(function (val) {
 
 function getTypoCount(tweet) {
   var typos = [];
-  row.tweet.split(' ').forEach(function (word) {
+  tweet.split(' ').forEach(function (word) {
     if (!dictionary.check(word)) {
       typos.push(word);
     }
@@ -74,17 +73,9 @@ if (fetchTweets) {
 
   var stream = client.stream('statuses/filter', {track: 'a'});
 
-  io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-      console.log(data);
-    });
-  });
-
-  io.on('connection', function() {
+  io.on('connection', function(socket) {
     stream.on('data', function(tweet) {
       if (tweet.lang === 'en' && !tweet.retweeted_status && tweet.entities.urls.length === 0) {
-        console.log(tweet);
         var typos = getTypoCount(tweet.text);
 
         db.run("INSERT INTO tweets (id, typos, time) VALUES (?, ?, ?)", [
@@ -93,7 +84,9 @@ if (fetchTweets) {
           Date.now()
         ]);
 
-        socket.emit('tweet', Object.assign(tweet, {typo: typo}));
+        socket.emit('tweet', Object.assign(tweet, {typos: typos}));
+
+        console.log(tweet);
       }
     });
   });
