@@ -64,15 +64,12 @@ if (fetchTweets) {
 
   var stream = client.stream('statuses/filter', {track: 'a'});
 
-
-
   io.on('connection', function (socket) {
-      socket.emit('news', { hello: 'world' });
-      socket.on('my other event', function (data) {
-            console.log(data);
-          });
+    socket.emit('news', { hello: 'world' });
+    socket.on('my other event', function (data) {
+      console.log(data);
+    });
   });
-
 
   io.on('connection', function() {
     stream.on('data', function(tweet) {
