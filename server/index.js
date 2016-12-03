@@ -4,19 +4,18 @@ var _ = require('lodash');
 var Typo = require('typo-js');
 var sqlite3 = require('sqlite3');
 var io = require('socket.io')();
+var path = require('path');
 
 var db = new sqlite3.Database('tweets.db');
 
-var app = require('express')();
+var express = require('express');
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 server.listen(8080);
 
-app.get('/', function (req, res) {
-  res.sendfile('../index.html');
-});
-
+app.use(express.static('public'));
 process.argv.forEach(function (val) {
   if (val == 'createdb') {
     db.serialize(function() {

@@ -2,14 +2,9 @@ var webpack = require('webpack');
 var path = require('path');
 
 module.exports = {
-  entry: [
-    'webpack-dev-server/client?http://0.0.0.0:8080',
-    'webpack/hot/only-dev-server',
-    './index.jsx'
-  ],
+  entry: './index.jsx',
   output: {
-    path: __dirname,
-    publicPath: '/',
+    path: __dirname+'/public',
     filename: 'app.js'
   },
   resolve: {
