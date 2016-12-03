@@ -7,22 +7,21 @@ var io = require('socket.io')();
 
 var db = new sqlite3.Database('tweets.db');
 
-var app = require('express')();
+var express= require('express')
+var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 server.listen(8080);
 
-app.get('/', function (req, res) {
-  res.sendfile('../index.html');
-});
+app.use(express.static('public'));
 
 process.argv.forEach(function (val) {
   if (val == 'createdb') {
     db.serialize(function() {
       db.run(`
         CREATE TABLE tweets (
-          id INTEGER PRIMARY KEY,
+          id INTEGER PRIMARY,
           typos INTEGER,
           time LONG
         );
@@ -31,23 +30,10 @@ process.argv.forEach(function (val) {
   }
 });
 
-//io.on('connection', function() {
-//  db.each("SELECT tweet FROM tweets", function(err, row) {
-//    var typos = [];
-//    row.tweet.split(' ').forEach(function (word) {
-//      if (!dictionary.check(word)) {
-//        typos.push(word);
-//      }
-//    });
-//    console.log(row.tweet, typos, '\n');
-//    socket.emit('tweet', { tweet: tweet, typos: typos });
-//  });
-//});
-
 function getTypoCount(tweet) {
   var typos = [];
-  row.tweet.split(' ').forEach(function (word) {
-    if (!dictionary.check(word)) {
+  tweet.split(' ').forEach(function(word) {
+    if (/\w+/.match(word) && !dictionary.check(word)) {
       typos.push(word);
     }
   });
@@ -72,34 +58,37 @@ if (fetchTweets) {
     access_token_secret: 'TlVxmebjYpnGNGDpeYlczWoNDmWmMiK7K9VNzE98UJ5or'
   });
 
-  var stream = client.stream('statuses/filter', {track: 'a'});
+  var stream = client.stream('statuses/filter', {track: 'a e i o u'});
 
-  io.on('connection', function (socket) {
-    socket.emit('news', { hello: 'world' });
-    socket.on('my other event', function (data) {
-      console.log(data);
-    });
-  });
+  var buffer = [];
+  stream.on('data', function(tweet) {
+    if (tweet.lang === 'en' && !tweet.retweeted_status && tweet.entities.urls.length === 0) {
+      var typos = getTypoCount(tweet.text);
+      buffer.push(Object.assign(tweet, {typos: typos}));
+      console.log(tweet);
 
-  io.on('connection', function() {
-    stream.on('data', function(tweet) {
-      if (tweet.lang === 'en' && !tweet.retweeted_status && tweet.entities.urls.length === 0) {
-        console.log(tweet);
-        var typos = getTypoCount(tweet.text);
-
-        db.run("INSERT INTO tweets (id, typos, time) VALUES (?, ?, ?)", [
-          tweet.id,
-          typos,
-          Date.now()
-        ]);
-
-        socket.emit('tweet', Object.assign(tweet, {typo: typo}));
-      }
-    });
-  });
-
-  stream.on('error', function(error) {
-    throw error;
-    db.close();
+      db.run("INSERT INTO tweets (id, typos, time) VALUES (?, ?, ?)", [
+        tweet.id,
+        typos,
+        Date.now()
+      ]);
+    }
   });
 }
+
+var connections = [];
+io.on('connection', function (socket) {
+  connections.push(socket);
+}
+
+setInterval(function() {
+  connections.forEach(function(socket) {
+    socket.emit('tweets', buffer);
+  });
+  buffer = [];
+}, 1000);
+
+stream.on('error', function(error) {
+  throw error;
+  db.close();
+});
