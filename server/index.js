@@ -1,28 +1,71 @@
 var Twitter = require('twitter');
 var fs = require('fs');
 var _ = require('lodash');
+var Typo = require('typo-js');
+var sqlite3 = require('sqlite3');
 
-const isTweet = _.conforms({
-  contributors: _.isObject,
-  id_str: _.isString,
-  text: _.isString,
+var db = new sqlite3.Database('tweets.db');
+
+process.argv.forEach(function (val) {
+  if (val == 'createdb') {
+    db.serialize(function() {
+      db.run(`
+        CREATE TABLE tweets (
+          id INTEGER PRIMARY KEY,
+          tweet VARCHAR(140),
+          time LONG,
+          typos INTEGER
+        );
+      `);
+    })
+  }
 });
 
-var client = new Twitter({
-  consumer_key: 'oYRsK4FAsDO2PKGLz0k5FWrst',
-  consumer_secret: 'nd5XiqHsZoiVFdDOzcwup20N3e76wEi8vmDDNSQiAi9maXS5bd',
-  access_token_key: '887801041-MGADZLyerYiulwsobh9tJJgGHQtue7DMOGMmMbWm',
-  access_token_secret: 'TlVxmebjYpnGNGDpeYlczWoNDmWmMiK7K9VNzE98UJ5or'
-});
 
-var stream = client.stream('statuses/filter', {track: 'a'});
-stream.on('data', function(event) {
-  console.log(event && event.text + "\n\n");
-  fs.appendFile('tweets.txt', event && event.text + "\n\n", function (err) {
-
+db.each("SELECT tweet FROM tweets", function(err, row) {
+  var typos  = [];
+  row.tweet.split(' ').forEach(function (word) {
+    if (!dictionary.check(word)) {
+      typos.push(word);
+    }
   });
+  console.log(row.tweet, typos, '\n');
 });
 
-stream.on('error', function(error) {
-  throw error;
-});
+var dictionary = new Typo('en_US');
+
+const fetchTweets = false;
+
+if (fetchTweets) {
+  const isTweet = _.conforms({
+    contributors: _.isObject,
+    id_str: _.isString,
+    text: _.isString,
+  });
+
+  var client = new Twitter({
+    consumer_key: 'oYRsK4FAsDO2PKGLz0k5FWrst',
+    consumer_secret: 'nd5XiqHsZoiVFdDOzcwup20N3e76wEi8vmDDNSQiAi9maXS5bd',
+    access_token_key: '887801041-MGADZLyerYiulwsobh9tJJgGHQtue7DMOGMmMbWm',
+    access_token_secret: 'TlVxmebjYpnGNGDpeYlczWoNDmWmMiK7K9VNzE98UJ5or'
+  });
+
+  var stream = client.stream('statuses/filter', {track: 'a'});
+
+  stream.on('data', function(tweet) {
+    if (tweet.lang === 'en' && !tweet.retweeted_status && !tweet.entities.urls) {
+      console.log(tweet);
+      db.run("INSERT INTO tweets (id, tweet, typos, time) VALUES (?, ?, ?, ?)", [
+        tweet.id,
+        tweet.text,
+        5,
+        Date.now()
+      ]);
+    }
+  });
+
+  stream.on('error', function(error) {
+    throw error;
+    db.close();
+  });
+}
