@@ -4,49 +4,59 @@ var _ = require('lodash');
 var Typo = require('typo-js');
 var sqlite3 = require('sqlite3');
 var io = require('socket.io')();
-var path = require('path');
 
 var db = new sqlite3.Database('tweets.db');
 
-var express = require('express');
-var app = express();
+var app = require('express')();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 server.listen(8080);
 
-app.use(express.static('public'));
+app.get('/', function (req, res) {
+  res.sendfile('../index.html');
+});
+
 process.argv.forEach(function (val) {
   if (val == 'createdb') {
     db.serialize(function() {
       db.run(`
         CREATE TABLE tweets (
           id INTEGER PRIMARY KEY,
-          tweet VARCHAR(140),
-          time LONG,
-          typos INTEGER
+          typos INTEGER,
+          time LONG
         );
       `);
     })
   }
 });
 
-io.on('connection', function(socket) {
-  db.each("SELECT tweet FROM tweets", function(err, row) {
-    var typos = [];
-    row.tweet.split(' ').forEach(function (word) {
-      if (!dictionary.check(word)) {
-        typos.push(word);
-      }
-    });
-    console.log(row.tweet, typos, '\n');
-    socket.emit('tweet', { tweet: row, typos: typos });
+//io.on('connection', function() {
+//  db.each("SELECT tweet FROM tweets", function(err, row) {
+//    var typos = [];
+//    row.tweet.split(' ').forEach(function (word) {
+//      if (!dictionary.check(word)) {
+//        typos.push(word);
+//      }
+//    });
+//    console.log(row.tweet, typos, '\n');
+//    socket.emit('tweet', { tweet: tweet, typos: typos });
+//  });
+//});
+
+function getTypoCount(tweet) {
+  var typos = [];
+  row.tweet.split(' ').forEach(function (word) {
+    if (!dictionary.check(word)) {
+      typos.push(word);
+    }
   });
-});
+  return typos;
+}
 
 var dictionary = new Typo('en_US');
 
-const fetchTweets = false;
+const fetchTweets = true;
 
 if (fetchTweets) {
   const isTweet = _.conforms({
@@ -73,17 +83,17 @@ if (fetchTweets) {
 
   io.on('connection', function() {
     stream.on('data', function(tweet) {
-      if (tweet.lang === 'en' && !tweet.retweeted_status && !tweet.entities.urls) {
+      if (tweet.lang === 'en' && !tweet.retweeted_status && tweet.entities.urls.length === 0) {
         console.log(tweet);
+        var typos = getTypoCount(tweet.text);
 
-        db.run("INSERT INTO tweets (id, tweet, typos, time) VALUES (?, ?, ?, ?)", [
+        db.run("INSERT INTO tweets (id, typos, time) VALUES (?, ?, ?)", [
           tweet.id,
-          tweet.text,
-          5,
+          typos,
           Date.now()
         ]);
 
-        socket.emit('tweet', tweet);
+        socket.emit('tweet', Object.assign(tweet, {typo: typo}));
       }
     });
   });

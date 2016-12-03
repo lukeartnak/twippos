@@ -9,7 +9,7 @@ export default class TwippoFeed extends React.Component {
       <div className="twippo-feed">
         <h2>Latest Twippos</h2>
         <ul className="media-list">
-          {this.props.tweets.map(tweet => <Twippo {...tweet} />)}
+          {this.props.tweets.map(tweet => <Twippo id={tweet.id} {...tweet} />)}
         </ul>
       </div>
     )

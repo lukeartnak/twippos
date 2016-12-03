@@ -4,7 +4,9 @@
   "description": "real-time twitter typos",
   "author": "Luke Artnak and Brennan Hoeting",
   "scripts": {
-    "start": "node ./server/index.js"
+    "start": "node ./server/index.js",
+    "createdb": "node ./server/index.js createdb",
+    "deletedb": "sqlite3 tweets.db \"drop table tweets;\""
   },
   "dependencies": {
     "lodash": "^4.17.2",

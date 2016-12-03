@@ -4,7 +4,7 @@ var path = require('path');
 module.exports = {
   entry: './index.jsx',
   output: {
-    path: __dirname+'/public',
+    path: './public',
     filename: 'app.js'
   },
   resolve: {
@@ -14,10 +14,7 @@ module.exports = {
     loaders: [{
       test: /\.jsx?$/,
       exclude: /node_modules/,
-      loaders: ['react-hot', 'babel']
+      loaders: ['babel']
     }]
-  },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin()
-  ]
+  }
 };
