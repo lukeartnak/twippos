@@ -11,6 +11,9 @@ export default class TwippoFeed extends React.Component {
           <Twippo />
           <Twippo />
           <Twippo />
+          <Twippo />
+          <Twippo />
+          <Twippo />
         </ul>
       </div>
     )
