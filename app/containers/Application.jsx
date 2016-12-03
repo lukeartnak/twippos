@@ -10,14 +10,16 @@ export default class Application extends React.Component {
     return (
       <div className="container">
         <div className="row">
-          <div className="col-xs-3">
-            <TwippoChart />
-          </div>
-          <div className="col-xs-6">
+          <div className="col-xs-8">
             <TwippoFeed />
           </div>
-          <div className="col-xs-3">
+          <div className="col-xs-4">
             <TwippoMeter />
+          </div>
+        </div>
+        <div className="row">
+          <div className="col-xs-12">
+            <TwippoChart />
           </div>
         </div>
       </div>
