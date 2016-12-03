@@ -7,7 +7,7 @@ var io = require('socket.io')();
 
 var db = new sqlite3.Database('tweets.db');
 
-var express= require('express')
+var express = require('express')
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
