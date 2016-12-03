@@ -3,8 +3,20 @@ var fs = require('fs');
 var _ = require('lodash');
 var Typo = require('typo-js');
 var sqlite3 = require('sqlite3');
+var io = require('socket.io')();
+
+
 
 var db = new sqlite3.Database('tweets.db');
+
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
+server.listen(8080);
+
+//app.get('/', function (req, res) {
+//});
 
 process.argv.forEach(function (val) {
   if (val == 'createdb') {
@@ -52,16 +64,31 @@ if (fetchTweets) {
 
   var stream = client.stream('statuses/filter', {track: 'a'});
 
-  stream.on('data', function(tweet) {
-    if (tweet.lang === 'en' && !tweet.retweeted_status && !tweet.entities.urls) {
-      console.log(tweet);
-      db.run("INSERT INTO tweets (id, tweet, typos, time) VALUES (?, ?, ?, ?)", [
-        tweet.id,
-        tweet.text,
-        5,
-        Date.now()
-      ]);
-    }
+
+
+  io.on('connection', function (socket) {
+      socket.emit('news', { hello: 'world' });
+      socket.on('my other event', function (data) {
+            console.log(data);
+          });
+  });
+
+
+  io.on('connection', function() {
+    stream.on('data', function(tweet) {
+      if (tweet.lang === 'en' && !tweet.retweeted_status && !tweet.entities.urls) {
+        console.log(tweet);
+
+        db.run("INSERT INTO tweets (id, tweet, typos, time) VALUES (?, ?, ?, ?)", [
+          tweet.id,
+          tweet.text,
+          5,
+          Date.now()
+        ]);
+
+        socket.emit('tweet', tweet);
+      }
+    });
   });
 
   stream.on('error', function(error) {
