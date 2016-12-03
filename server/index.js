@@ -32,15 +32,17 @@ process.argv.forEach(function (val) {
   }
 });
 
-
-db.each("SELECT tweet FROM tweets", function(err, row) {
-  var typos  = [];
-  row.tweet.split(' ').forEach(function (word) {
-    if (!dictionary.check(word)) {
-      typos.push(word);
-    }
+io.on('connection', function() {
+  db.each("SELECT tweet FROM tweets", function(err, row) {
+    var typos = [];
+    row.tweet.split(' ').forEach(function (word) {
+      if (!dictionary.check(word)) {
+        typos.push(word);
+      }
+    });
+    console.log(row.tweet, typos, '\n');
+    socket.emit('tweet', { tweet: tweet, typos: typos });
   });
-  console.log(row.tweet, typos, '\n');
 });
 
 var dictionary = new Typo('en_US');
