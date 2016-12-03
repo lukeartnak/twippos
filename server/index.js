@@ -31,7 +31,7 @@ process.argv.forEach(function (val) {
   }
 });
 
-io.on('connection', function() {
+io.on('connection', function(socket) {
   db.each("SELECT tweet FROM tweets", function(err, row) {
     var typos = [];
     row.tweet.split(' ').forEach(function (word) {
@@ -40,7 +40,7 @@ io.on('connection', function() {
       }
     });
     console.log(row.tweet, typos, '\n');
-    socket.emit('tweet', { tweet: tweet, typos: typos });
+    socket.emit('tweet', { tweet: row, typos: typos });
   });
 });
 

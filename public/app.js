@@ -63,7 +63,7 @@
 /******/ 	}
 
 /******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "d69a37b5d03498bfaba0"; // eslint-disable-line no-unused-vars
+/******/ 	var hotCurrentHash = "17f39a24888e9fedddb6"; // eslint-disable-line no-unused-vars
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
 
@@ -22477,6 +22477,8 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -22489,16 +22491,23 @@
 	  function Application() {
 	    _classCallCheck(this, Application);
 
-	    return _possibleConstructorReturn(this, (Application.__proto__ || Object.getPrototypeOf(Application)).apply(this, arguments));
+	    var _this = _possibleConstructorReturn(this, (Application.__proto__ || Object.getPrototypeOf(Application)).call(this));
+
+	    _this.state = { tweets: [] };
+	    return _this;
 	  }
 
 	  _createClass(Application, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      this.socket = (0, _socket2.default)('localhost:8080');
-	      console.log('sfdksfjl');
+	      var _this2 = this;
+
+	      this.socket = (0, _socket2.default)('127.0.0.1:8080');
+	      this.socket.on('connection', function () {
+	        return console.log('hello');
+	      });
 	      this.socket.on('tweet', function (tweet) {
-	        console.log(tweet);
+	        _this2.setState({ tweets: [].concat(_toConsumableArray(_this2.state.tweets), [tweet]) });
 	      });
 	    }
 	  }, {
@@ -22513,7 +22522,9 @@
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'col-xs-8' },
-	            _react2.default.createElement(_TwippoFeed2.default, null)
+	            _react2.default.createElement(_TwippoFeed2.default, { tweets: this.state.tweets.filter(function (tweet) {
+	                return tweet.typos.length > 10;
+	              }) })
 	          ),
 	          _react2.default.createElement(
 	            'div',
@@ -22941,12 +22952,9 @@
 	        _react2.default.createElement(
 	          'ul',
 	          { className: 'media-list' },
-	          _react2.default.createElement(_Twippo2.default, null),
-	          _react2.default.createElement(_Twippo2.default, null),
-	          _react2.default.createElement(_Twippo2.default, null),
-	          _react2.default.createElement(_Twippo2.default, null),
-	          _react2.default.createElement(_Twippo2.default, null),
-	          _react2.default.createElement(_Twippo2.default, null)
+	          this.props.tweets.map(function (tweet) {
+	            return _react2.default.createElement(_Twippo2.default, tweet);
+	          })
 	        )
 	      );
 	    }
@@ -23004,17 +23012,17 @@
 	        _react2.default.createElement(
 	          "span",
 	          { className: "tag tag-default tag-default float-xs-right" },
-	          "14"
+	          this.props.typos.length
 	        ),
 	        _react2.default.createElement(
 	          "h4",
 	          { className: "list-group-item-heading" },
-	          "Luke Artnak"
+	          this.props.tweet.author
 	        ),
 	        _react2.default.createElement(
 	          "p",
 	          { className: "list-group-item-text" },
-	          "Donec id elit non mi porta gravida at eget metus. Maecenas sed diam eget risus varius blandit."
+	          this.props.tweet.tweet
 	        )
 	      );
 	    }
