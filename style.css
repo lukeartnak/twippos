@@ -1,4 +1,17 @@
+.navbar {
+  margin-bottom: 10px;
+}
+
+.twippo-meter {
+  text-align: center;
+}
+
+.twippo-chart {
+  margin: 0 auto;
+}
+
 .thermometer {
+  margin: 0 auto;
   width: 100px;
   height: 500px;
   position: relative;

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Analytics from './Analytics';
+import TwippoChart from '../components/TwippoChart';
 import TwippoFeed from './TwippoFeed';
 import TwippoMeter from '../components/TwippoMeter';
 
@@ -8,15 +8,19 @@ export default class Application extends React.Component {
 
   render() {
     return (
-      <div className="row">
-        <div className="col-xs-3">
-          <Analytics />
+      <div className="container">
+        <div className="row">
+          <div className="col-xs-8">
+            <TwippoFeed />
+          </div>
+          <div className="col-xs-4">
+            <TwippoMeter />
+          </div>
         </div>
-        <div className="col-xs-6">
-          <TwippoFeed />
-        </div>
-        <div className="col-xs-3">
-          <TwippoMeter />
+        <div className="row">
+          <div className="col-xs-12">
+            <TwippoChart />
+          </div>
         </div>
       </div>
     )
