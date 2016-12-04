@@ -82,11 +82,29 @@ io.on('connection', function (socket) {
 });
 
 setInterval(function() {
+  var end = Date.now();
+  var start = end - 30000;
+  var tps = 0;
+  db.each("SELECT * tweets WHERE time > ? AND time < ?", [start, end], function(err, row) {
+    tps += row.typos;
+  }, function () {
+    tps /= 30;
+    socket.emit('tps', tps);
+  });
+
   connections.forEach(function(socket) {
     socket.emit('tweets', buffer);
   });
   buffer = [];
 }, 1000);
+
+setInterval(function() {
+  var end = Date.now();
+  var start = end - 30000;
+  db.each("SELECT * tweets WHERE time > ? AND time < ?", [start, end], function(err, row) {
+    console.log(row.id + ": " + row.info);
+  });
+});
 
 stream.on('error', function(error) {
   throw error;
