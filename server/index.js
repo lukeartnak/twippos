@@ -98,14 +98,6 @@ setInterval(function() {
   buffer = [];
 }, 1000);
 
-setInterval(function() {
-  var end = Date.now();
-  var start = end - 30000;
-  db.each("SELECT * tweets WHERE time > ? AND time < ?", [start, end], function(err, row) {
-    console.log(row.id + ": " + row.info);
-  });
-});
-
 stream.on('error', function(error) {
   throw error;
   db.close();
