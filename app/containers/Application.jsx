@@ -15,9 +15,8 @@ export default class Application extends React.Component {
 
   componentDidMount() {
     this.socket = io('127.0.0.1:8080');
-    this.socket.on('tweet', (tweet) => {
-      this.setState({tweets: [...this.state.tweets, tweet]});
-      console.log(tweet);
+    this.socket.on('tweets', (tweets) => {
+      this.setState({tweets: this.state.tweets.concat(tweets)});
     });
   }
 
@@ -26,15 +25,10 @@ export default class Application extends React.Component {
       <div className="container">
         <div className="row">
           <div className="col-xs-8">
-            <TwippoFeed tweets={this.state.tweets.filter(tweet => tweet.typos > 10)} />
+            <TwippoFeed tweets={this.state.tweets.sort((a, b) => b.typos-a.typos).slice(0, 6)} />
           </div>
           <div className="col-xs-4">
             <TwippoMeter />
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-xs-12">
-            <TwippoChart />
           </div>
         </div>
       </div>

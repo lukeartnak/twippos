@@ -21,7 +21,7 @@ process.argv.forEach(function (val) {
     db.serialize(function() {
       db.run(`
         CREATE TABLE tweets (
-          id INTEGER PRIMARY,
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
           typos INTEGER,
           time LONG
         );
@@ -33,16 +33,19 @@ process.argv.forEach(function (val) {
 function getTypoCount(tweet) {
   var typos = [];
   tweet.split(' ').forEach(function(word) {
-    if (/\w+/.match(word) && !dictionary.check(word)) {
+    if (/^[a-zA-Z]+$/.test(word) && !dictionary.check(word)) {
       typos.push(word);
     }
   });
+  console.log(typos);
   return typos;
 }
 
 var dictionary = new Typo('en_US');
 
 const fetchTweets = true;
+
+  var buffer = [];
 
 if (fetchTweets) {
   const isTweet = _.conforms({
@@ -58,17 +61,14 @@ if (fetchTweets) {
     access_token_secret: 'TlVxmebjYpnGNGDpeYlczWoNDmWmMiK7K9VNzE98UJ5or'
   });
 
-  var stream = client.stream('statuses/filter', {track: 'a e i o u'});
+  var stream = client.stream('statuses/filter', {track: 'and'});
 
-  var buffer = [];
+
   stream.on('data', function(tweet) {
     if (tweet.lang === 'en' && !tweet.retweeted_status && tweet.entities.urls.length === 0) {
       var typos = getTypoCount(tweet.text);
-      buffer.push(Object.assign(tweet, {typos: typos}));
-      console.log(tweet);
-
-      db.run("INSERT INTO tweets (id, typos, time) VALUES (?, ?, ?)", [
-        tweet.id,
+      buffer.push(Object.assign(tweet, {typos: typos.length}));
+      db.run("INSERT INTO tweets (typos, time) VALUES (?, ?)", [
         typos,
         Date.now()
       ]);
@@ -79,7 +79,7 @@ if (fetchTweets) {
 var connections = [];
 io.on('connection', function (socket) {
   connections.push(socket);
-}
+});
 
 setInterval(function() {
   connections.forEach(function(socket) {

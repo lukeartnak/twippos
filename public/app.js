@@ -21503,8 +21503,6 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -21529,9 +21527,8 @@
 	      var _this2 = this;
 
 	      this.socket = (0, _socket2.default)('127.0.0.1:8080');
-	      this.socket.on('tweet', function (tweet) {
-	        _this2.setState({ tweets: [].concat(_toConsumableArray(_this2.state.tweets), [tweet]) });
-	        console.log(tweet);
+	      this.socket.on('tweets', function (tweets) {
+	        _this2.setState({ tweets: _this2.state.tweets.concat(tweets) });
 	      });
 	    }
 	  }, {
@@ -21546,23 +21543,14 @@
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'col-xs-8' },
-	            _react2.default.createElement(_TwippoFeed2.default, { tweets: this.state.tweets.filter(function (tweet) {
-	                return tweet.typos > 10;
-	              }) })
+	            _react2.default.createElement(_TwippoFeed2.default, { tweets: this.state.tweets.sort(function (a, b) {
+	                return b.typos - a.typos;
+	              }).slice(0, 6) })
 	          ),
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'col-xs-4' },
 	            _react2.default.createElement(_TwippoMeter2.default, null)
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'row' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-xs-12' },
-	            _react2.default.createElement(_TwippoChart2.default, null)
 	          )
 	        )
 	      );
@@ -21901,12 +21889,12 @@
 	        _react2.default.createElement(
 	          "h4",
 	          { className: "list-group-item-heading" },
-	          this.props.author
+	          this.props.user.screen_name
 	        ),
 	        _react2.default.createElement(
 	          "p",
 	          { className: "list-group-item-text" },
-	          this.props.tweet
+	          this.props.text
 	        )
 	      );
 	    }
