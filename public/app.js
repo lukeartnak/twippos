@@ -21517,7 +21517,7 @@
 
 	    var _this = _possibleConstructorReturn(this, (Application.__proto__ || Object.getPrototypeOf(Application)).call(this));
 
-	    _this.state = { tweets: [] };
+	    _this.state = { tweets: [], tps: 0 };
 	    return _this;
 	  }
 
@@ -21529,6 +21529,9 @@
 	      this.socket = (0, _socket2.default)('127.0.0.1:8080');
 	      this.socket.on('tweets', function (tweets) {
 	        _this2.setState({ tweets: _this2.state.tweets.concat(tweets) });
+	      });
+	      this.socket.on('tps', function (tps) {
+	        _this2.setState({ tps: tps.tps });
 	      });
 	    }
 	  }, {
@@ -21550,7 +21553,7 @@
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'col-xs-4' },
-	            _react2.default.createElement(_TwippoMeter2.default, null)
+	            _react2.default.createElement(_TwippoMeter2.default, { tps: this.state.tps, max: this.state.max })
 	          )
 	        )
 	      );
@@ -21824,7 +21827,7 @@
 	        _react2.default.createElement(
 	          'h2',
 	          null,
-	          'Latest Twippos'
+	          'Biggest Twippos'
 	        ),
 	        _react2.default.createElement(
 	          'ul',
@@ -21879,8 +21882,8 @@
 	    key: "render",
 	    value: function render() {
 	      return _react2.default.createElement(
-	        "div",
-	        { className: "list-group-item" },
+	        "li",
+	        { className: "twippo list-group-item" },
 	        _react2.default.createElement(
 	          "span",
 	          { className: "tag tag-default tag-default float-xs-right" },
@@ -21889,7 +21892,7 @@
 	        _react2.default.createElement(
 	          "h4",
 	          { className: "list-group-item-heading" },
-	          this.props.user.screen_name
+	          '@' + this.props.user.screen_name
 	        ),
 	        _react2.default.createElement(
 	          "p",
@@ -21941,6 +21944,7 @@
 	  _createClass(TwippoMeter, [{
 	    key: "render",
 	    value: function render() {
+	      var size = this.props.tps / 15 * 89;
 	      return _react2.default.createElement(
 	        "div",
 	        { className: "twippo-meter" },
@@ -21952,13 +21956,14 @@
 	        _react2.default.createElement(
 	          "h3",
 	          null,
-	          "23 TPS"
+	          (Math.round(this.props.tps * 10) / 10).toFixed(1),
+	          " TPS"
 	        ),
 	        _react2.default.createElement(
 	          "div",
 	          { className: "thermometer" },
 	          _react2.default.createElement("div", { className: "neck" }),
-	          _react2.default.createElement("div", { className: "neck-fill" }),
+	          _react2.default.createElement("div", { className: "neck-fill", style: { height: size + '%' } }),
 	          _react2.default.createElement("div", { className: "bulb" }),
 	          _react2.default.createElement("div", { className: "bulb-fill" })
 	        )

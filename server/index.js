@@ -12,6 +12,8 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
+var spellchecker = require('spellchecker');
+
 server.listen(8080);
 
 app.use(express.static('public'));
@@ -33,6 +35,7 @@ process.argv.forEach(function (val) {
 function getTypoCount(tweet) {
   var typos = [];
   tweet.split(' ').forEach(function(word) {
+
     if (/^[a-zA-Z]+$/.test(word) && !dictionary.check(word)) {
       typos.push(word);
     }
@@ -69,7 +72,7 @@ if (fetchTweets) {
       var typos = getTypoCount(tweet.text);
       buffer.push(Object.assign(tweet, {typos: typos.length}));
       db.run("INSERT INTO tweets (typos, time) VALUES (?, ?)", [
-        typos,
+        typos.length,
         Date.now()
       ]);
     }
@@ -83,20 +86,22 @@ io.on('connection', function (socket) {
 
 setInterval(function() {
   var end = Date.now();
-  var start = end - 30000;
+  var start = end - 5000;
   var tps = 0;
-  db.each("SELECT * tweets WHERE time > ? AND time < ?", [start, end], function(err, row) {
+  db.each("SELECT * FROM tweets WHERE time > ? AND time < ?", [start, end], function(err, row) {
     tps += row.typos;
   }, function () {
-    tps /= 30;
-    socket.emit('tps', tps);
+    tps /= 5;
+    connections.forEach(function(socket) {
+      socket.emit('tps', {tps: tps});
+    });
   });
 
   connections.forEach(function(socket) {
     socket.emit('tweets', buffer);
   });
   buffer = [];
-}, 1000);
+}, 3000);
 
 stream.on('error', function(error) {
   throw error;

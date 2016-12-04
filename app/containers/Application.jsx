@@ -10,7 +10,7 @@ export default class Application extends React.Component {
 
   constructor() {
     super();
-    this.state = {tweets: []};
+    this.state = {tweets: [], tps: 0};
   }
 
   componentDidMount() {
@@ -18,6 +18,9 @@ export default class Application extends React.Component {
     this.socket.on('tweets', (tweets) => {
       this.setState({tweets: this.state.tweets.concat(tweets)});
     });
+    this.socket.on('tps', tps => {
+      this.setState({tps: tps.tps});
+    })
   }
 
   render() {
@@ -28,7 +31,7 @@ export default class Application extends React.Component {
             <TwippoFeed tweets={this.state.tweets.sort((a, b) => b.typos-a.typos).slice(0, 6)} />
           </div>
           <div className="col-xs-4">
-            <TwippoMeter />
+            <TwippoMeter tps={this.state.tps} max={this.state.max}/>
           </div>
         </div>
       </div>
