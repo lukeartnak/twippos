@@ -64,7 +64,7 @@ if (fetchTweets) {
     access_token_secret: 'TlVxmebjYpnGNGDpeYlczWoNDmWmMiK7K9VNzE98UJ5or'
   });
 
-  var stream = client.stream('statuses/filter', {track: 'and'});
+  var stream = client.stream('statuses/filter', {locations: '-180,-90,180,90'});
 
 
   stream.on('data', function(tweet) {
